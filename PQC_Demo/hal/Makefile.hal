@@ -1,0 +1,55 @@
+# Processor frequency (external freq-in)
+ifndef F_CPU
+F_CPU = 7372800
+endif
+
+HALPATH = $(FIRMWAREPATH)/hal
+VPATH += :$(HALPATH)
+
+#Default stuff
+EXTRAINCDIRS += $(HALPATH)
+
+#Manually have to update these lists...
+PLATFORM_LIST = CW308_STM32F3
+
+define KNOWN_PLATFORMS
+
++-------------------------------------------------------+
+| PLATFORM      | DESCRIPTION                           |
++=======================================================+
++=======================================================+
++ ARM Cortex-M Targets (Generic)                        |
++=======================================================+
++-------------------------------------------------------+
+| CW308_STM32F3 | CW308T-STM32F3 (ST Micro STM32F3)     |
++-------------------------------------------------------+
+
+Options to define platform:
+(1) Run make with PLATFORM specified as follows:
+make PLATFORM=CW308_STM32F3
+
+(2) Save a file called Makefile.platform with contents:
+PLATFORM=CW308_STM32F3
+
+endef
+
+PLTNAME = Unknown Platform
+
+ifeq ($(DEMO),SECCAN)
+	CFLAGS += -DSECCAN
+endif
+
+ifeq ($(MCU_CLK), INT)
+  CFLAGS += -DUSE_INTERNAL_CLK
+endif
+
+ifeq ($(PLATFORM),CW308_STM32F3)
+ HAL = stm32f3
+ PLTNAME = CW308T: STM32F3 Target
+else
+  $(error Invalid or empty PLATFORM: $(PLATFORM). Known platforms: $(KNOWN_PLATFORMS))
+endif
+
+include $(HALPATH)/$(HAL)/Makefile.$(HAL)
+
+CDEFS += -DHAL_TYPE=HAL_$(HAL) -DPLATFORM=$(PLATFORM)
